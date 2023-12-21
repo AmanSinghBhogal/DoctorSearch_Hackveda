@@ -8,9 +8,9 @@ const Navbar = () => (
   <Flex p='2' borderBottom='1px' borderColor='gray.100'>
     <Box width={150} fontSize='3xl' color='blue.400' fontWeight='bold'>
       <Flex>
-        <Image src="/assets/images/findoc.png" height={25} width={25}/>
+        <Image src="/assets/images/findoc.png" alt="Logo" height={25} width={25}/>
         <Spacer />
-        <Link href='/' paddingLeft='2'>FindDoc</Link>
+        <Link href='/' >FindDoc</Link>
       </Flex>
     </Box>
     <Spacer />
