@@ -1,12 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Flex, Select, Box, Text, Input, Spinner, Icon, Button } from '@chakra-ui/react';
+import { useState } from 'react';
+import { Flex, Select, Box, Button } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import { MdCancel } from 'react-icons/md';
-import Image from 'next/image';
-
 import { filterData, getFilterValues } from '../utils/filterData';
-import { baseUrl, fetchApi } from '../utils/fetchApi';
-const noresult ='/assets/images/noresult.svg';
+
 
 export default function SearchFilters() {
   const [filters] = useState(filterData);
@@ -37,10 +33,13 @@ export default function SearchFilters() {
         undefined, 
         { shallow: true }
     );
+    router.push({ pathname, query: params.toString() });
   }
 
   const clearFilters = () => {
     router.replace('/search', undefined, { shallow: true });
+    const path = router.pathname;
+    router.push({ pathname: path, query: '' });
     setQueryExist(false);
   }
 

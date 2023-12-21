@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import Image from "next/image";
 import { Flex, Box, Text, Button } from '@chakra-ui/react';
-
+import sanity from "../lib/sanity";
 import DocCard from '../components/DocCard';
-import { baseUrl, fetchApi } from '../utils/fetchApi';
 
 export const Banner = ({ purpose, title1, title2, desc1, desc2, buttonText, linkName, imageUrl }) => (
   <Flex flexWrap='wrap' justifyContent='center' alignItems='center' m='10'>
@@ -20,7 +19,7 @@ export const Banner = ({ purpose, title1, title2, desc1, desc2, buttonText, link
 );
 
 
-const Home = ({ propertiesForRent }) => (
+const Home = ({ doctorsAvailable }) => (
   <Box alignItems='center'>
     <Banner
       purpose='Find a Doctor'
@@ -28,21 +27,23 @@ const Home = ({ propertiesForRent }) => (
       desc1=' Explore from Pediatrician, Dentist, Gynecologist'
       desc2='and more'
       buttonText='Explore Physicians'
-      linkName='/search?purpose=for-rent'
+      linkName='/search?specialization=Physician'
       imageUrl='/assets/images/home_2.png'
     />
     <Flex flexWrap='wrap' alignItems='center' justifyContent='center'>
-      {propertiesForRent.map((property) => <DocCard property={property} key={property.id} />)}
+      {doctorsAvailable.map((doctor) => <DocCard doctor={doctor} key={doctor.id} />)}
     </Flex>
   </Box>
 );
 
 export async function getStaticProps() {
-  const propertyForRent = await fetchApi(`${baseUrl}/properties/list?locationExternalIDs=5002&purpose=for-rent&hitsPerPage=6`);
+
+  const query = '*[_type == "doctors"]';
+  const doctorsAvailable = await sanity.fetch(query);
 
   return {
     props: {
-      propertiesForRent: propertyForRent?.hits,
+      doctorsAvailable: doctorsAvailable,
     },
   };
 }

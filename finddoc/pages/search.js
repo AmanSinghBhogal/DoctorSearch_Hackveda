@@ -1,15 +1,17 @@
+"use client"
+
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image'
 import { Flex, Box, Text, Icon } from '@chakra-ui/react';
+import sanity from "../lib/sanity";
 import { BsFilter } from 'react-icons/bs';
 
 import DocCard from '../components/DocCard';
 import SearchFilters from '../components/SearchFilters';
-import { baseUrl, fetchApi } from '../utils/fetchApi';
 const noresult = '/assets/images/noresult.svg';
 
-const Search = ({ properties }) => {
+const Search = ({ doctors }) => {
   const [searchFilters, setSearchFilters] = useState(false);
   const router = useRouter();
 
@@ -34,10 +36,12 @@ const Search = ({ properties }) => {
       <Text fontSize='2xl' p='4' fontWeight='bold'>
       {router.query.specialization?.charAt(0).toUpperCase()}{router.query.specialization?.slice(1)} Doctors 
       </Text>
+
       <Flex flexWrap='wrap' alignItems='center' justifyContent='center'>
-        {properties.map((property) => <DocCard property={property} key={property.id} />)}
+        {doctors.map((doctor) => <DocCard doctor={doctor} key={doctor._id} />)}
       </Flex>
-      {properties.length === 0 && (
+
+      {doctors.length === 0 && (
         <Flex justifyContent='center' alignItems='center' flexDir='column' marginTop='5' marginBottom='5'>
           <Image src={noresult} width={100} height={100} />
           <Text fontSize='xl' marginTop='3'>No Result Found.</Text>
@@ -48,22 +52,49 @@ const Search = ({ properties }) => {
 };
 
 export async function getServerSideProps({ query }) {
-  const purpose = query.purpose || 'for-rent';
-  const rentFrequency = query.rentFrequency || 'yearly';
-  const minPrice = query.minPrice || '0';
-  const maxPrice = query.maxPrice || '1000000';
-  const roomsMin = query.roomsMin || '0';
-  const bathsMin = query.bathsMin || '0';
-  const sort = query.sort || 'price-desc';
-  const areaMax = query.areaMax || '35000';
-  const locationExternalIDs = query.locationExternalIDs || '5002';
-  const categoryExternalID = query.categoryExternalID || '4';
 
-  const data = await fetchApi(`${baseUrl}/properties/list?locationExternalIDs=${locationExternalIDs}&purpose=${purpose}&categoryExternalID=${categoryExternalID}&bathsMin=${bathsMin}&rentFrequency=${rentFrequency}&priceMin=${minPrice}&priceMax=${maxPrice}&roomsMin=${roomsMin}&sort=${sort}&areaMax=${areaMax}`);
+  const specialization = query.specialization || '_';
+  const city = query.city || '_';
+  const state = query.state || '_';
+  let url;
+  
+  if (specialization !== '_' && city !== '_' && state !== '_'){
+    url = `*[_type == "doctors" && specialization == "${specialization}" && city == "${city}" && state == "${state}"]`;
+  }
+  else if (specialization !== '_' && city !== '_'&& state === '_')
+  {
+    url = `*[_type == "doctors" && specialization == "${specialization}" && city == "${city}"]`;
+  }
+  else if(specialization === '_' && city !=='_' && state !== '_')
+  {
+    url = `*[_type == "doctors" &&  city == "${city}" && state == "${state}"]`;
+  }
+  else if (specialization !== '_' && city ==='_'  && state !== '_')
+  {
+    url = `*[_type == "doctors" && specialization == "${specialization}" && state == "${state}"]`;
+  }
+  else if(specialization !== '_' && city ==='_'  && state === '_')
+  {
+    url = `*[_type == "doctors" && specialization == "${specialization}"]`;
+  }
+  else if(specialization === '_' && city !== '_' && state === '_')
+  {
+    url = `*[_type == "doctors" && city == "${city}"]`;
+  }
+  else if(specialization === '_' && city === '_' && state !== '_')
+  {
+    url = `*[_type == "doctors" && state == "${state}"]`;
+  }
+  else
+  {
+    url = '*[_type == "doctors"]';
+  }
+
+  const data = await sanity.fetch(url);
 
   return {
     props: {
-      properties: data?.hits,
+      doctors: data,
     },
   };
 }
